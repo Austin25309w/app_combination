@@ -10,6 +10,14 @@ const list = [
         objectID: 0,
     }
 ]
+
+const DEFAULT_QUERY = "redux";
+
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 // ES5
 // function isSearched(searchTerm) {
 //     return function(item){
@@ -18,7 +26,7 @@ const list = [
 //     }
 // }
 //ES6
-const isSearched = searchTerm => 
+const isSearched = (searchTerm) => item =>
     !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
 
@@ -27,10 +35,28 @@ class Exercise extends React.Component {
         super();
         this.state = {
             list,
-            searchTerm: '',
+            searchTerm: DEFAULT_QUERY,
+
         };
+        this.setSearchTopstories = this.setSearchTopstories.bind(this);
+        this.fetchSearchTopstories = this.fetchSearchTopstories.bind(this);
         this.onSearchChange = this.onSearchChange.bind(this);
         this.onDismiss = this.onDismiss.bind(this);
+    }
+
+    setSearchTopstories(result){
+        this.setState({result});
+    }
+
+    fetchSearchTopstories(searchTerm){
+        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+            .then(response => response.json())
+            .then(result => this.setSearchTopstories(result));
+    }
+
+    componentDidMount(){
+        const {searchTerm} = this.state;
+        this.fetchSearchTopstories(searchTerm);
     }
 
     onSearchChange(event){
@@ -48,26 +74,26 @@ class Exercise extends React.Component {
     }
 
     render(){
+        const {searchTerm, result } = this.state;
+
+        if(!result){return null;}
         return (
             <div className="App">
-                <Search 
-                    value={searchTerm}
-                    onChange={this.onSearchChange}
-                >Search
-                </Search>
-                <Table 
-                    list = {list}
-                    pattern = {searchTerm}
-                    onDismiss = {this.onDismiss}
-                    />
-
-                <form>
-                    <input 
-                    type ="text"
-                    value= {searchTerm}
-                    onChange={this.onSearchChange }/>
-                </form>
-               
+                <div className="page">
+                    <div className ="interactions">
+                        <Search 
+                            value={searchTerm}
+                            onChange={this.onSearchChange}
+                            >Search
+                        </Search>
+                    </div>
+                
+                    <Table 
+                        list = {list.hits}
+                        pattern = {searchTerm}
+                        onDismiss = {this.onDismiss}
+                        />        
+                </div>
             </div>
         )
     }
@@ -97,35 +123,43 @@ class Exercise extends React.Component {
             />
         </form>
 
+const largeColumn = {
+    width: '40%',
+}
 
+const midColumnm = {
+    width: '30%',
+}
 
-class Table extends Component {
-    render(){
-        const { list, pattern, onDismiss } = this.props;
-        return (
-            <div>
+const smallColumn = {
+    width: '10%'
+}
+
+const Table = ({list, pattern, onDismiss }) =>
+            <div className = "table">
                 {list.filter(isSearched(pattern)).map(item =>
-                    <div key={item.objectID}>
-                        <span>
+                    <div key={item.objectID} className="table-row">
+                        <span style= { largeColumn }>
                             <a href = {item.url}>{item.title}</a>
                         </span>
-                        <span>{item.author}</span>|
-                        <span>{item.num_comments}</span>|
-                        <span>{item.points}</span>
+                        <span style = { midColumnm }>{item.author}</span>|
+                        <span style = { smallColumn }>{item.num_comments}</span>|
+                        <span style = { smallColumn }>{item.points}</span>
 
-                        <span>
-                            <Button onClick={() => onDismiss(item.objectID)}>
+                        <span style = { smallColumn }>
+                            <Button 
+                                onClick={() => onDismiss(item.objectID)}
+                                className = "button-inline"
+                            >
                                 Dismiss
                             </Button>
                         </span>
                     </div>
                 )}
             </div>
-        )
-    }
-}
 
-class Button extends Component {
+
+class Button extends React.Component {
     render() {
         const {
             onClick,
