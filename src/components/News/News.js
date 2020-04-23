@@ -9,8 +9,8 @@ class News extends React.Component {
       return (
           <div>
             <h1>News</h1>
-              <Exercise/>
               <Clock />
+              <Exercise/>
           </div>
       )
   }

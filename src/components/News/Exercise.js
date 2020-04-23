@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import '../../App.css';
+
 
 const DEFAULT_QUERY = "redux";
 const DEFAULT_PAGE = 0;
@@ -23,6 +24,7 @@ const PARAM_HPP = 'hitsPerPage=';
 //ES6
 const isSearched = (searchTerm) => item =>
     !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
+
 
 
 class Exercise extends React.Component {
@@ -230,5 +232,38 @@ const Button = ({ onClick, className = '', children}) =>
                 {children}
             </button>
 
+// Button.defaultProps = {
+//     className: '',
+// }
+
+// Button.propTypes = {
+//     onClick: PropTypes.func.isRequired,
+//     className: PropTypes.string,
+//     children: PropTypes.node.isRequired,
+// };
+
+// Table.propTypes = {
+
+//     list: PropTypes.arrayOf(
+//         PropTypes.shape({
+//             objectID: PropTypes.string.isRequired,
+//             author: PropTypes.string,
+//             url: PropTypes.string,
+//             num_comments: PropTypes.number,
+//             points: PropTypes.number,
+//         })
+//     ).isRequired,
+//     onDismiss: PropTypes.func.isRequired,
+// }
+
 
 export default Exercise
+
+
+export {
+    Button,
+    Search,
+    Table,
+}
+
+
