@@ -1,23 +1,18 @@
 import React from 'react';
-
-const list = [
-    {
-        title: 'React',
-        url: 'https://facebook.github.io/react/',
-        author: 'Jordan Walke',
-        num_comments: 3,
-        points: 4,
-        objectID: 0,
-    }
-]
+import '../../App.css';
 
 const DEFAULT_QUERY = "redux";
+const DEFAULT_PAGE = 0;
+const DEFAULT_HPP = '100';
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
+const PARAM_HPP = 'hitsPerPage=';
 
-const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+
+// const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${PARAM_PAGE}`;
 // ES5
 // function isSearched(searchTerm) {
 //     return function(item){
@@ -31,42 +26,85 @@ const isSearched = (searchTerm) => item =>
 
 
 class Exercise extends React.Component {
-    constructor(props) {
-        super();
-        this.state = {
-            list,
-            searchTerm: DEFAULT_QUERY,
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            results: null,
+            searchKey: '',
+            searchTerm: DEFAULT_QUERY,
         };
+        
+        this.needsToSearchTopstoreis = this.needsToSearchTopstoreis.bind(this);
         this.setSearchTopstories = this.setSearchTopstories.bind(this);
         this.fetchSearchTopstories = this.fetchSearchTopstories.bind(this);
         this.onSearchChange = this.onSearchChange.bind(this);
+        this.onSearchSubmit = this.onSearchSubmit.bind(this);
         this.onDismiss = this.onDismiss.bind(this);
     }
 
-    setSearchTopstories(result){
-        this.setState({result});
+    needsToSearchTopstoreis(searchTerm){
+        return !this.state.results[searchTerm];
     }
 
-    fetchSearchTopstories(searchTerm){
-        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+    setSearchTopstories(result){
+        const { hits, page } = result;
+        const { searchKey, results } = this.state;
+
+        const oldHits = results && results[searchKey]
+            ? results[searchKey].hits
+            : [];
+
+        const updatedHits = [
+            ...oldHits,
+            ...hits
+        ];
+
+        this.setState({
+            ...results,
+            [searchKey]: { hits: updatedHits, page }
+        })
+    }
+
+    fetchSearchTopstories(searchTerm, page){
+        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
             .then(response => response.json())
             .then(result => this.setSearchTopstories(result));
     }
 
     componentDidMount(){
         const {searchTerm} = this.state;
-        this.fetchSearchTopstories(searchTerm);
+        this.setState({ searchKey: searchTerm });
+        this.fetchSearchTopstories(searchTerm, DEFAULT_PAGE);
     }
 
     onSearchChange(event){
         this.setState({searchTerm: event.target.value })
     }
 
+    onSearchSubmit(event){
+        const { searchTerm } = this.state;
+        this.setState({ searchKey: searchTerm });
+        if(this.needsToSearchTopstoreis(searchTerm)){
+            this.fetchSearchTopstories(searchTerm, DEFAULT_PAGE);
+        }
+        event.preventDefault();
+    }
+
     onDismiss(id){
+        const { searchKey, results } = this.state;
+        const { hits, page } = results[searchKey];
+
         const isNotId = item => item.objectId !== id;
-        const updatedList = this.state.list.filter(isNotId);
-        this.setState({list: updatedList});
+        const updatedHits = hits.filter(isNotId);
+
+        this.setState({
+            result: { 
+            ...results, 
+            [searchKey]: { hits: updatedHits, page} 
+            }
+        });
     }
 
     getName(){
@@ -74,27 +112,43 @@ class Exercise extends React.Component {
     }
 
     render(){
-        const {searchTerm, result } = this.state;
+        const { searchTerm, 
+                results, 
+                searchKey } = this.state;
+        const page = ( 
+                results && 
+                results[searchKey] && 
+                results[searchKey].page
+            ) || 0;
+        
+        const list = (
+            results &&
+            results[searchKey] &&
+            results[searchKey].hits
+            ) || [];
 
-        if(!result){return null;}
         return (
-            <div className="App">
+            // <div className="App">
                 <div className="page">
                     <div className ="interactions">
                         <Search 
                             value={searchTerm}
                             onChange={this.onSearchChange}
+                            onSubmit={this.onSearchSubmit}
                             >Search
                         </Search>
                     </div>
-                
                     <Table 
-                        list = {list.hits}
-                        pattern = {searchTerm}
+                        list = {list}
                         onDismiss = {this.onDismiss}
-                        />        
+                    />       
+                    <div className ='interactions'>
+                        <Button onClick={() => this.fetchSearchTopstories(searchKey, page + 1)}>
+                            More
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            // </div>
         )
     }
 }
@@ -114,13 +168,21 @@ class Exercise extends React.Component {
 //     }
 // }
 //ES6
- const Search = ({value, onChange, children}) =>
-        <form>
-            {children} <input
+ const Search = ({
+     value, 
+     onChange, 
+     children,
+     onSubmit
+    }) =>
+        <form onSubmit = {onSubmit}>
+            <input
                 type = "text"
                 value = {value}
                 onChange={onChange}
             />
+            <button type = "submit">
+                {children} 
+            </button>
         </form>
 
 const largeColumn = {
@@ -134,10 +196,10 @@ const midColumnm = {
 const smallColumn = {
     width: '10%'
 }
-
-const Table = ({list, pattern, onDismiss }) =>
+//p92
+const Table = ({ list, onDismiss }) =>
             <div className = "table">
-                {list.filter(isSearched(pattern)).map(item =>
+                { list.map(item =>
                     <div key={item.objectID} className="table-row">
                         <span style= { largeColumn }>
                             <a href = {item.url}>{item.title}</a>
@@ -159,16 +221,7 @@ const Table = ({list, pattern, onDismiss }) =>
             </div>
 
 
-class Button extends React.Component {
-    render() {
-        const {
-            onClick,
-            className = '',
-            children,
-        } = this.props
-    
-
-        return (
+const Button = ({ onClick, className = '', children}) =>
             <button
                 onClick= {onClick}
                 className={className}
@@ -176,8 +229,6 @@ class Button extends React.Component {
             >
                 {children}
             </button>
-        )
-    }
-}
+
 
 export default Exercise
