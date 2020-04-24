@@ -170,22 +170,36 @@ class Exercise extends React.Component {
 //     }
 // }
 //ES6
- const Search = ({
-     value, 
-     onChange, 
-     children,
-     onSubmit
-    }) =>
-        <form onSubmit = {onSubmit}>
-            <input
-                type = "text"
-                value = {value}
-                onChange={onChange}
-            />
-            <button type = "submit">
-                {children} 
-            </button>
-        </form>
+class Search extends Component {
+
+    componentDidMount(){
+        this.input.focus();
+    }
+
+    render(){
+        const {
+        value, 
+        onChange, 
+        children,
+        onSubmit
+    } = this.props;
+
+        return(
+            <form onSubmit = {onSubmit}>
+                        <input
+                            type = "text"
+                            value = {value}
+                            onChange={onChange}
+                            ref={(node) => {this.input = node; }}
+                            />
+                        <button type = "submit">
+                            {children} 
+                        </button>
+                    </form>
+                )
+            }
+}
+
 
 const largeColumn = {
     width: '40%',
