@@ -12,6 +12,9 @@ const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 const PARAM_HPP = 'hitsPerPage=';
 
+const Loading = () => 
+    <div>Loading ...</div>
+
 
 // const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${PARAM_PAGE}`;
 // ES5
@@ -36,6 +39,7 @@ class Exercise extends React.Component {
             results: null,
             searchKey: '',
             searchTerm: DEFAULT_QUERY,
+            isLoading: false,
         };
         
         this.needsToSearchTopstoreis = this.needsToSearchTopstoreis.bind(this);
@@ -64,12 +68,17 @@ class Exercise extends React.Component {
         ];
 
         this.setState({
-            ...results,
-            [searchKey]: { hits: updatedHits, page }
-        })
+            results: {
+                ...results,
+                [searchKey]: { hits: updatedHits, page }
+            }, 
+            isLoading: false
+        });
     }
 
     fetchSearchTopstories(searchTerm, page){
+        this.setState({ isLoading: true });
+
         fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
             .then(response => response.json())
             .then(result => this.setSearchTopstories(result));
@@ -116,7 +125,8 @@ class Exercise extends React.Component {
     render(){
         const { searchTerm, 
                 results, 
-                searchKey } = this.state;
+                searchKey,
+                isLoading } = this.state;
         const page = ( 
                 results && 
                 results[searchKey] && 
@@ -145,9 +155,13 @@ class Exercise extends React.Component {
                         onDismiss = {this.onDismiss}
                     />       
                     <div className ='interactions'>
+                        { isLoading
+                            ? <Loading /> 
+                        :
                         <Button onClick={() => this.fetchSearchTopstories(searchKey, page + 1)}>
                             More
                         </Button>
+                    }
                     </div>
                 </div>
             // </div>
@@ -213,6 +227,8 @@ const smallColumn = {
     width: '10%'
 }
 //p92
+
+
 const Table = ({ list, onDismiss }) =>
             <div className = "table">
                 { list.map(item =>
@@ -236,7 +252,6 @@ const Table = ({ list, onDismiss }) =>
                 )}
             </div>
 
-
 const Button = ({ onClick, className = '', children}) =>
             <button
                 onClick= {onClick}
@@ -246,29 +261,6 @@ const Button = ({ onClick, className = '', children}) =>
                 {children}
             </button>
 
-// Button.defaultProps = {
-//     className: '',
-// }
-
-// Button.propTypes = {
-//     onClick: PropTypes.func.isRequired,
-//     className: PropTypes.string,
-//     children: PropTypes.node.isRequired,
-// };
-
-// Table.propTypes = {
-
-//     list: PropTypes.arrayOf(
-//         PropTypes.shape({
-//             objectID: PropTypes.string.isRequired,
-//             author: PropTypes.string,
-//             url: PropTypes.string,
-//             num_comments: PropTypes.number,
-//             points: PropTypes.number,
-//         })
-//     ).isRequired,
-//     onDismiss: PropTypes.func.isRequired,
-// }
 
 
 export default Exercise
