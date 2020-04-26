@@ -182,7 +182,7 @@ class Exercise extends React.Component {
                             onClick={() => this.fetchSearchTopstories(searchKey, page + 1)}>
                             More
                         </ButtonWithLoading>
-                    }
+                    
                     </div>
                 </div>
             // </div>
@@ -316,7 +316,6 @@ class Table extends Component {
                                 Dismiss
                             </Button>
                         </span>
-                }
                 </div>
                 )}
             </div>
@@ -326,14 +325,14 @@ class Table extends Component {
 
 
 const Button = ({ onClick, className ='', children}) => {
-
     return (
             <button
                 onClick= {onClick}
                 className={className}
                 type="button"
-                >{children}</button>
-        )
+                >{children}
+            </button>
+            )
     }
 
 
