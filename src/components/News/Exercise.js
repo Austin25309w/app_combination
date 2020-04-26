@@ -1,4 +1,6 @@
 import React, { Component, PropTypes } from 'react';
+import { sortBy } from 'lodash';
+import className from 'classnames'
 import '../../App.css';
 
 
@@ -15,15 +17,21 @@ const PARAM_HPP = 'hitsPerPage=';
 const Loading = () => 
     <div>Loading ...</div>
 
+const Sort = ({ sortKey, onSort, children }) => 
+<Button onClick ={() => onSort(sortKey)}
+    className="button-inline"
+>
+    {children}
+</Button>
 
-// const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${PARAM_PAGE}`;
-// ES5
-// function isSearched(searchTerm) {
-//     return function(item){
-//         return !searchTerm ||
-//             item.title.toLowerCase().includes(searchTerm.toLowerCase());
-//     }
-// }
+
+const SORTS = {
+    NONE: list => list,
+    TITLE: list => sortBy(list, 'title'),
+    AUTHOR: list => sortBy(list, 'author'),
+    COMMENTS: list => sortBy(list, 'num_comments').reverse(),
+    POINTS: list => sortBy(list, 'points').reverse(),
+};
 //ES6
 const isSearched = (searchTerm) => item =>
     !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -40,6 +48,8 @@ class Exercise extends React.Component {
             searchKey: '',
             searchTerm: DEFAULT_QUERY,
             isLoading: false,
+            sortKey: 'NONE',
+            isSortReverse: false,
         };
         
         this.needsToSearchTopstoreis = this.needsToSearchTopstoreis.bind(this);
@@ -48,6 +58,7 @@ class Exercise extends React.Component {
         this.onSearchChange = this.onSearchChange.bind(this);
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
         this.onDismiss = this.onDismiss.bind(this);
+        this.onSort = this.onSort.bind(this);
     }
 
     needsToSearchTopstoreis(searchTerm){
@@ -118,6 +129,11 @@ class Exercise extends React.Component {
         });
     }
 
+    onSort(sortKey){
+        const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+        this.setState({ sortKey, isSortReverse });
+    }
+
     getName(){
         return this.firstname + ' ' + this.lastname;
     }
@@ -126,7 +142,10 @@ class Exercise extends React.Component {
         const { searchTerm, 
                 results, 
                 searchKey,
-                isLoading } = this.state;
+                isLoading,
+                sortKey,
+                isSortReverse 
+            }  = this.state;
         const page = ( 
                 results && 
                 results[searchKey] && 
@@ -152,15 +171,17 @@ class Exercise extends React.Component {
                     </div>
                     <Table 
                         list = {list}
+                        sortKey = {sortKey}
+                        isSortReverse ={ isSortReverse}
+                        onSort = {this.onSort}
                         onDismiss = {this.onDismiss}
                     />       
                     <div className ='interactions'>
-                        { isLoading
-                            ? <Loading /> 
-                        :
-                        <Button onClick={() => this.fetchSearchTopstories(searchKey, page + 1)}>
+                        <ButtonWithLoading
+                            isLoading={isLoading}
+                            onClick={() => this.fetchSearchTopstories(searchKey, page + 1)}>
                             More
-                        </Button>
+                        </ButtonWithLoading>
                     }
                     </div>
                 </div>
@@ -229,9 +250,56 @@ const smallColumn = {
 //p92
 
 
-const Table = ({ list, onDismiss }) =>
+class Table extends Component { 
+    constructor(props){
+        super(props)
+    }
+    render(){
+        const { list, sortKey, onSort, onDismiss } = this.props;
+        const smallColumn = {
+            width: '10%'
+        }
+        return(
             <div className = "table">
-                { list.map(item =>
+                <div className="table-header">
+
+                    <span style ={{ width: '40%'}}>
+                        <Sort 
+                            sortKey = {'TITLE'}
+                            onSort = {onSort}
+                        >
+                            Title
+                        </Sort>
+                    </span>
+                    <span style ={{ width: '30% '}}>
+                        <Sort
+                            sortKey = {'AUTHOR'}
+                            onSort = {onSort}
+                        >
+                            Author
+                        </Sort>
+                    </span>
+                    <span style = {{ width: '10%'}}>
+                        <Sort
+                            sortKey={'COMMENTS'}
+                            onSort = {onSort}
+                        >
+                            Comments
+                        </Sort>
+                    </span>
+                    <span style ={{ width: '10%' }}>
+                        <Sort
+                            sortKey = {"COMMENTS"}
+                            onSort={onSort}
+                        >
+                            Points
+                        </Sort>
+                    </span>
+                    <span style ={{ width: '10%'}}>
+                        Archive
+                    </span>
+                </div>
+                {SORTS[sortKey](list).map(item =>
                     <div key={item.objectID} className="table-row">
                         <span style= { largeColumn }>
                             <a href = {item.url}>{item.title}</a>
@@ -248,28 +316,44 @@ const Table = ({ list, onDismiss }) =>
                                 Dismiss
                             </Button>
                         </span>
-                    </div>
+                }
+                </div>
                 )}
             </div>
+        )
+    }
+}
 
-const Button = ({ onClick, className = '', children}) =>
+
+const Button = ({ onClick, className ='', children}) => {
+
+    return (
             <button
                 onClick= {onClick}
                 className={className}
                 type="button"
-            >
-                {children}
-            </button>
+                >{children}</button>
+        )
+    }
 
 
 
-export default Exercise
 
+const withLoading = ( Component ) => (props) => 
+    props.isLoading ? <Loading /> : <Component { ... props} />  
+
+const ButtonWithLoading = withLoading(Button);
 
 export {
     Button,
     Search,
     Table,
+    Loading
 }
+export default Exercise
+
+
+
+
 
 
