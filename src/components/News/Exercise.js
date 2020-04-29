@@ -1,6 +1,6 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component} from 'react';
 import { sortBy } from 'lodash';
-import className from 'classnames'
+import classNames from 'classnames'
 import '../../App.css';
 
 
@@ -17,12 +17,19 @@ const PARAM_HPP = 'hitsPerPage=';
 const Loading = () => 
     <div>Loading ...</div>
 
-const Sort = ({ sortKey, onSort, children }) => 
-<Button onClick ={() => onSort(sortKey)}
-    className="button-inline"
->
-    {children}
-</Button>
+const Sort = ({ sortKey, onSort, children, activeSortKey }) => {
+    const sortClass = classNames(
+        'button-inline',
+        { 'button-active': sortKey === activeSortKey }
+    )
+    return (
+        <Button onClick ={() => onSort(sortKey)}
+            className="button-inline"
+        >
+            {children}
+        </Button>
+    )
+}
 
 
 const SORTS = {
@@ -48,8 +55,7 @@ class Exercise extends React.Component {
             searchKey: '',
             searchTerm: DEFAULT_QUERY,
             isLoading: false,
-            sortKey: 'NONE',
-            isSortReverse: false,
+            sortKey: 'NONE'
         };
         
         this.needsToSearchTopstoreis = this.needsToSearchTopstoreis.bind(this);
@@ -118,20 +124,19 @@ class Exercise extends React.Component {
         const { searchKey, results } = this.state;
         const { hits, page } = results[searchKey];
 
-        const isNotId = item => item.objectId !== id;
+        const isNotId = item => item.objectID !== id;
         const updatedHits = hits.filter(isNotId);
 
         this.setState({
-            result: { 
-            ...results, 
-            [searchKey]: { hits: updatedHits, page} 
-            }
+            results: { 
+                ...results, 
+                [searchKey]: { hits: updatedHits, page} 
+                }
         });
     }
 
     onSort(sortKey){
-        const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
-        this.setState({ sortKey, isSortReverse });
+        this.setState({ sortKey });
     }
 
     getName(){
@@ -143,8 +148,7 @@ class Exercise extends React.Component {
                 results, 
                 searchKey,
                 isLoading,
-                sortKey,
-                isSortReverse 
+                sortKey
             }  = this.state;
         const page = ( 
                 results && 
@@ -172,7 +176,6 @@ class Exercise extends React.Component {
                     <Table 
                         list = {list}
                         sortKey = {sortKey}
-                        isSortReverse ={ isSortReverse}
                         onSort = {this.onSort}
                         onDismiss = {this.onDismiss}
                     />       
@@ -255,7 +258,7 @@ class Table extends Component {
         super(props)
     }
     render(){
-        const { list, sortKey, onSort, onDismiss } = this.props;
+        const { list, sortKey, onSort, onDismiss,  } = this.props;
         const smallColumn = {
             width: '10%'
         }
