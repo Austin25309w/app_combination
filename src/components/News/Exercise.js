@@ -15,7 +15,7 @@ const PARAM_PAGE = 'page=';
 const PARAM_HPP = 'hitsPerPage=';
 
 const Loading = () => 
-    <div>Loading ...</div>
+    <div style = {{ color: 'red' }}>Loading ...</div>
 
 const Sort = ({ sortKey, onSort, children, activeSortKey }) => {
     const sortClass = classNames(
