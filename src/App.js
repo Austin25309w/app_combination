@@ -6,7 +6,7 @@ import Nav from './components/Nav'
 function App() {
   return (
     <div className="App">
-      <h1>Austin's APP</h1>
+      <h1>Austin's React JS Apps</h1>
       <Nav/>
     </div>
   );

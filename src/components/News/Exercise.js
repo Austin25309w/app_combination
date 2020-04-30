@@ -6,7 +6,7 @@ import '../../App.css';
 
 const DEFAULT_QUERY = "redux";
 const DEFAULT_PAGE = 0;
-const DEFAULT_HPP = '100';
+const DEFAULT_HPP = '50';
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
@@ -305,11 +305,11 @@ class Table extends Component {
                 {SORTS[sortKey](list).map(item =>
                     <div key={item.objectID} className="table-row">
                         <span style= { largeColumn }>
-                            <a href = {item.url}>{item.title}</a>
+                            <a href = {item.url} target="_blank">{item.title}</a>
                         </span>
                         <span style = { midColumnm }>{item.author}</span>|
                         <span style = { smallColumn }>{item.num_comments}</span>|
-                        <span style = { smallColumn }>{item.points}</span>
+                        <span style = { smallColumn }>{item.points}</span>|
 
                         <span style = { smallColumn }>
                             <Button 

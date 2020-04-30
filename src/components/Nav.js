@@ -23,20 +23,20 @@ class Nav extends React.Component {
                                 <Link className="link" to="/">Home </Link>
                                 <span className="link">|</span>
                             </li>
-                            <li className="line"> 
-                                <Link className="link" to="/snake">Snake </Link>
-                                <span className= "link">|</span>
-                            </li>
                             <li className="line">
-                                <Link className="link" to="/ecommerce">Ecommerce_app </Link>
+                                <Link className="link" to="/hacker_news">Hacker_News </Link>
                                 <span className="link">|</span>
                             </li>
                             <li className="line">
                                 <Link className="link" to="/music_streaming">Music_Streaming </Link>
                                 <span className="link">|</span>
                             </li>
+                            <li className="line"> 
+                                <Link className="link" to="/snake">Snake </Link>
+                                <span className= "link">|</span>
+                            </li>
                             <li className="line">
-                                <Link className="link" to="/hacker_news">Hacker_News</Link>
+                                <Link className="link" to="/ecommerce">Ecommerce_app </Link>
                             </li>
                         </ul>
                     </nav>
