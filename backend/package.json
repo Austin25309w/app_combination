@@ -1,0 +1,19 @@
+{
+  "name": "data",
+  "version": "0.1.0",
+  "description": "products",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon --watch backend --exec babel-node server.js"
+  },
+  "author": "austin",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/node": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "nodemon": "^2.0.4"
+  }
+}
